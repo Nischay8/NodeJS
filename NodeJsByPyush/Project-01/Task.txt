@@ -1,0 +1,8 @@
+Rest Api -JSon 
+
+// Get /Users -Get data of All Users
+
+// Get /Users/1 Get the Users with ID 1
+// Get /Users/2 Get the Users with ID 2
+
+// Post/users- Add a new users
