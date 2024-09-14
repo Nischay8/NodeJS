@@ -21,10 +21,40 @@ exports.createTour = async (req, res) => {
 
 exports.getAllTours = async (req, res) => {
   try {
-    const allTours = await Tour.find({});
+    // 1Filtering
+    const queryObj = { ...req.query };
+    const excludedFields = ['page', 'sort', 'limit', 'fields'];
+    excludedFields.forEach(el => delete queryObj[el]);
+
+    let queryStr = JSON.stringify(queryObj);
+    queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, match => `$${match}`);
+
+    // const allTours = await Tour.find(queryStr);
+
+    let query = Tour.find(JSON.parse(queryStr));
+
+    if (req.query.sort) {
+      const sortBy = req.query.sort.split(',').join(' ');
+      query = query.sort(sortBy);
+    }
+
+    const page = req.query.page * 1 || 1;
+    const limit = req.query.limit * 1 || 100;
+    const skip = (page - 1) * limit;
+
+    query = query.skip(skip).limit(limit);
+
+    const tour = await query;
+
+    //   .where('duration')
+    //   .equals('5')
+    //   .where('difficulty')
+    //   .equals('easy');
+
     res.status(200).json({
       status: 'Success',
-      data: allTours
+      result: tour.length,
+      data: tour
     });
   } catch (error) {
     res.status(404).json({
@@ -61,6 +91,21 @@ exports.updateTour = async (req, res) => {
       data: {
         tour: updatedTour
       }
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: 'Fail',
+      message: error
+    });
+  }
+};
+
+exports.deleteTour = async (req, res) => {
+  try {
+    await Tour.findByIdAndDelete(req.params.id);
+    res.status(204).json({
+      status: 'success',
+      data: null
     });
   } catch (error) {
     res.status(400).json({

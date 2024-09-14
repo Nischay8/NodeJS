@@ -4,23 +4,31 @@ const { connectToMongoDB } = require("./connect");
 const app = express();
 const urls = require("./models/url");
 const PORT = 8001;
+const { restrictToLoggedinUserOnly } = require("./middelwares/auth");
+const userRoute = require("./routes/user");
+const staticRoute = require("./routes/statisRouter");
+const cookieParser = require("cookie-parser");
+
 app.use(express.json());
+
 app.use(express.urlencoded({ extended: false }));
 
 const urlRoute = require("./routes/url");
 4;
 
-const staticRoute = require("./routes/statisRouter");
+app.use(cookieParser());
 
-app.use("/url", urlRoute);
+app.use("/url", restrictToLoggedinUserOnly, urlRoute);
 
 app.use("/", staticRoute);
+
+app.use("/user", userRoute);
 
 app.get("/url/:shorid", async (req, res) => {
   const shorid = req.params.shorid;
   const entry = await urls.findOne({ shortId: shorid });
- 
-    res.redirect('https://' + entry.redirectURL)
+
+  res.redirect("https://" + entry.redirectURL);
 });
 
 connectToMongoDB("mongodb://localhost:27017/shorturl")
