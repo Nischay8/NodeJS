@@ -1,7 +1,14 @@
 const express = require('express');
-const userController = require('./../controllers/userController');
+const userController = require('../controllers/userController');
+const authrouter = require('../controllers/authController');
 
 const router = express.Router();
+
+router.post('/signup', authrouter.signup);
+router.post('/login', authrouter.login);
+
+router.post('/forgetPassword', authrouter.forgetPassword);
+router.post('/resetPassword', authrouter.resetPassword);
 
 router
   .route('/')
